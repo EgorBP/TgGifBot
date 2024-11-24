@@ -1,10 +1,6 @@
-import os
 import asyncio
-from aiogram import Bot, Dispatcher, F
-from aiogram.filters import Command
-from aiogram.types import Message, FSInputFile, ContentType, File
+from aiogram import Bot, Dispatcher
 
-from lexicon import lang_ru
 import handlers
 
 
@@ -15,6 +11,7 @@ async def main():
     dp = Dispatcher()
     dp.include_router(handlers.router)
 
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == '__main__':

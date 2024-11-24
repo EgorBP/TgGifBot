@@ -1,4 +1,4 @@
-import os
+import os, json
 from time import time
 
 from aiogram import Router, F
@@ -25,10 +25,16 @@ async def gif_answer(msg):
 
     folder_path = 'animations'
     os.makedirs(folder_path, exist_ok=True)
-    file_path = os.path.join(folder_path, f"{gif_id}.mp4")  # Путь куда сохранить гифку,
-                                                            # (.join ставит '/' или '\' для винды или линукса)
+    file_path = os.path.join(folder_path, f"{gif_id}.mp4")  # Путь куда сохранить гифку
+
     if not os.path.exists(file_path):
-        await bot.download(gif, destination=file_path)      # Скачивает, если пути нету создает
+        await bot.download(gif, destination=file_path)      # Скачивает, если пути нету создает его
+
+
+    await msg.answer(text=lang_ru['gif_tag'])
+    
+    # with open('attributes.json', 'w') as file:
+    #     json.dump()
 
     print(time() - st_time)
 
