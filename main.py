@@ -19,6 +19,7 @@ async def gif_answer(message):
     gif_id = message.animation.file_id  # Получаем id гифки
     gif = await bot.get_file(gif_id)    # Получаем сам файл гифки(там есть id, и др хуй знает зачем)
     folder_path = 'animations'
+    os.makedirs(folder_path, exist_ok=True)
     file_path = os.path.join(folder_path, f"{gif_id}.mp4")  # Путь куда сохранить гифку,
     await bot.download(gif, destination=file_path)          # (.join ставит '/' или '\' для винды или линукса)
 
