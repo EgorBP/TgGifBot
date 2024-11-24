@@ -47,7 +47,8 @@ async def add_tags_to_gif(msg):
     latest_file = max(full_paths, key=os.path.getctime)
     latest_file_name = os.path.basename(latest_file)
 
-    to_json = {latest_file_name: msg.text.replace(' ', '').split(',')}
+    tags = [tag.strip().lower() for tag in msg.text.split(',')]
+    to_json = {latest_file_name: tags}
 
     with open('attributes.json', 'r+') as file:
         if os.stat('attributes.json').st_size:
