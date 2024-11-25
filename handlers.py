@@ -3,13 +3,20 @@ from time import time
 
 from aiogram import Router, F
 from aiogram.types import message, FSInputFile
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import default_state, State, StatesGroup
+from aiogram.fsm.storage.memory import MemoryStorage
 
 from lexicon import lang_ru
 
 
 router = Router()
-last_message = False
+storage = MemoryStorage()
+
+class FSMGifRegister(StatesGroup):
+    gif_id = State()
+
 
 @router.message(Command('start'))
 async def start_command_answer(msg):
@@ -17,9 +24,7 @@ async def start_command_answer(msg):
 
 
 @router.message(F.animation)
-async def gif_answer(msg):
-    global last_message
-
+async def gif_answer(msg, state):
     bot = msg.bot
 
     gif_id = msg.animation.file_id      # Получаем id гифки
@@ -33,22 +38,16 @@ async def gif_answer(msg):
         await bot.download(gif, destination=file_path)      # Скачивает, если пути нету создает его
 
     await msg.answer(text=lang_ru['gif_tag_request'])
-    last_message = True
+    await state.update_data(gif_id=gif_id)
+    await state.set_state(FSMGifRegister.tag_receiving)
 
 
-@router.message(lambda msg: last_message)
-async def add_tags_to_gif(msg):
-    directory = 'animations'
-    # Получаем список всех файлов в директории
-    files = os.listdir(directory)
-    # Получаем полный путь к каждому файлу в директории
-    full_paths = [os.path.join(directory, file) for file in files]
-    # Отсортируем файлы по времени создания (по убыванию)
-    latest_file = max(full_paths, key=os.path.getctime)
-    latest_file_name = os.path.basename(latest_file)
+@router.message(StateFilter(FSMGifRegister.gif_id))
+async def add_tags_to_gif(msg, state):
+    latest_file_id = state.get_data()['gif_id']
 
     tags = [tag.strip().lower() for tag in msg.text.split(',')]
-    to_json = {latest_file_name: tags}
+    to_json = {latest_file_id: tags}
 
     with open('attributes.json', 'r+') as file:
         if os.stat('attributes.json').st_size:
@@ -81,7 +80,7 @@ async def send_all_gifs(msg):
 
         await msg.answer_animation(gif_to_send)
         await msg.answer(f"Теги: {', '.join(all_gifs[gif])}")
-        gif_id = list(all_gifs.keys())[0]
-        gif_id = gif_id[:gif_id.find('.')]
+        # gif_id = list(all_gifs.keys())[0]
+        # gif_id = gif_id[:gif_id.find('.')]
         # await msg.answer_animation(gif_id)
 
