@@ -29,10 +29,10 @@ async def gif_answer(msg):
     os.makedirs(folder_path, exist_ok=True)
     file_path = os.path.join(folder_path, f"{gif_id}.mp4")  # Путь куда сохранить гифку
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(file_path):                       # Проверяет скачан ли уже файл
         await bot.download(gif, destination=file_path)      # Скачивает, если пути нету создает его
 
-    await msg.answer(text=lang_ru['gif_tag'])
+    await msg.answer(text=lang_ru['gif_tag_request'])
     last_message = True
 
 
@@ -56,6 +56,7 @@ async def add_tags_to_gif(msg):
         else:
             all_gifs = {}
         file.seek(0)
+        file.truncate()
 
         all_gifs.update(to_json)
         json.dump(all_gifs, file, indent=4, ensure_ascii=False)
@@ -80,4 +81,7 @@ async def send_all_gifs(msg):
 
         await msg.answer_animation(gif_to_send)
         await msg.answer(f"Теги: {', '.join(all_gifs[gif])}")
+        gif_id = list(all_gifs.keys())[0]
+        gif_id = gif_id[:gif_id.find('.')]
+        # await msg.answer_animation(gif_id)
 
