@@ -1,29 +1,25 @@
-import os, json
-from time import time
+import json
+import os
 
 from aiogram import Router, F
-from aiogram.types import message, FSInputFile
 from aiogram.filters import Command, StateFilter
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import default_state, State, StatesGroup
-from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.state import default_state
+from aiogram.types import FSInputFile
 
 from lexicon import lang_ru
-
+from states import FSMGifRegister
 
 router = Router()
-storage = MemoryStorage()
-
-class FSMGifRegister(StatesGroup):
-    gif_id = State()
 
 
 @router.message(Command('start'))
 async def start_command_answer(msg):
+    # !!!!
+    await state.clear()
     await msg.answer(lang_ru['/start'])
 
 
-@router.message(F.animation)
+@router.message(F.animation, StateFilter(default_state))
 async def gif_answer(msg, state):
     bot = msg.bot
 
@@ -37,9 +33,9 @@ async def gif_answer(msg, state):
     if not os.path.exists(file_path):                       # Проверяет скачан ли уже файл
         await bot.download(gif, destination=file_path)      # Скачивает, если пути нету создает его
 
-    await msg.answer(text=lang_ru['gif_tag_request'])
+    await msg.answer(text=lang_ru['gif_saved'])
     await state.update_data(gif_id=gif_id)
-    await state.set_state(FSMGifRegister.tag_receiving)
+    await state.set_state(FSMGifRegister.gif_tag)
 
 
 @router.message(StateFilter(FSMGifRegister.gif_id))
@@ -61,9 +57,7 @@ async def add_tags_to_gif(msg, state):
         json.dump(all_gifs, file, indent=4, ensure_ascii=False)
 
     await msg.answer(text=lang_ru['successfully_saved'])
-
-    global last_message
-    last_message = False
+    await state.clear()
 
 
 @router.message(Command('take_all'))
