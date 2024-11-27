@@ -1,22 +1,25 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from environs import Env
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from handlers import commands_handlers, functional_handlers
 from states import storage
+from config import load_config
 
 
 async def main():
-    env = Env()
-    env.read_env()
-    bot_token = env('BOT_TOKEN')
-
-    bot = Bot(token=bot_token)
+    bot = Bot(
+        token=load_config().tg_bot.token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    )
 
     dp = Dispatcher(storage=storage)
-    dp.include_router(commands_handlers.router)
-    dp.include_router(functional_handlers.router)
+    dp.include_routers(
+        commands_handlers.router,
+        functional_handlers.router
+    )
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

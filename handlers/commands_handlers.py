@@ -1,4 +1,5 @@
 import json
+import os
 
 from aiogram import Router
 from aiogram.filters import Command, StateFilter
@@ -18,24 +19,36 @@ async def start_command_answer(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(lang_ru['/start'])
 
-from aiogram.fsm.state import default_state
 
-@router.message(Command('take_all'), StateFilter(default_state))
+@router.message(Command('cancel'), StateFilter(FSMGifRegister.gif_tag))
+async def stop_adding(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer(lang_ru['canceled'])
+
+
+@router.message(Command('send_gifs'), ~StateFilter(default_state))
+async def not_now_sending(message: Message):
+    await message.answer(lang_ru['not_now'])
+
+
+@router.message(Command('send_gifs'), StateFilter(default_state))
 async def send_all_gifs(message: Message):
-    with open('attributes.json', 'r') as file:
-        if os.stat('attributes.json').st_size:
-            all_gifs = json.load(file)
-        else:
-            all_gifs = {}
+    path = os.path.join('data', 'data.json')
+    user_id = str(message.from_user.id)
 
-    for gif in os.listdir('animations'):
-        file_path = os.path.join('animations', gif)
-        gif_to_send = FSInputFile(file_path)
+    with open(path, 'r') as file:
+        try:
+            data = json.load(file)
+            gifs_data = data[user_id]['gifs_data']
+        except (json.JSONDecodeError, KeyError):
+            await message.answer(lang_ru['no_gifs'])
+            return
 
-        await message.answer_animation(gif_to_send)
-        await message.answer(f"Теги: {', '.join(all_gifs[gif])}")
-        # gif_id = list(all_gifs.keys())[0]
-        # gif_id = gif_id[:gif_id.find('.')]
-        # await msg.answer_animation(gif_id)
+    for gif_name in gifs_data.keys():
+        gif_id = gifs_data[gif_name]['gif_id']
+        gif_tags = ', #'.join(gifs_data[gif_name]['gif_tags'])
 
-
+        await message.answer_animation(
+            gif_id,
+            caption=f'<b>Теги </b>:  #{gif_tags}',
+        )
