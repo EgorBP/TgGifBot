@@ -14,6 +14,8 @@ router = Router()
 
 @router.message(F.animation, StateFilter(default_state))
 async def gif_answer(msg: Message, state: FSMContext):
+    await state.set_state(FSMGifRegister.gif_id)
+
     gif_id = msg.animation.file_id      # Получаем id гифки
 
     await state.update_data(gif_id=gif_id)
@@ -24,8 +26,13 @@ async def gif_answer(msg: Message, state: FSMContext):
 
 @router.message(StateFilter(FSMGifRegister.gif_tag))
 async def add_tags_to_gif(message: Message, state: FSMContext):
-    tags = message.text.split(',')
-    tags: list[str] = [tag.strip() for tag in tags]
+    try:
+        tags = message.text.split(',')
+    except AttributeError:
+        await message.answer(lang_ru['need_text'])
+        return
+
+    tags: list[str] = [f'#{tag.strip()}' for tag in tags]
     await state.update_data(gif_tag=tags)
 
     data = await state.get_data()               # In json int was always
@@ -36,3 +43,7 @@ async def add_tags_to_gif(message: Message, state: FSMContext):
     await message.answer(text=lang_ru['successfully_saved'])
     await state.clear()
 
+
+@router.message()
+async def bad_message(message: Message):
+    await message.answer(lang_ru['wrong_message'])

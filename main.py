@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from handlers import commands_handlers, functional_handlers
+from handlers import user_handlers, functional_handlers
 from states import storage
 from config import load_config
 
@@ -17,7 +17,7 @@ async def main():
 
     dp = Dispatcher(storage=storage)
     dp.include_routers(
-        commands_handlers.router,
+        user_handlers.router,
         functional_handlers.router
     )
 
