@@ -1,6 +1,8 @@
 import json
 import os
 
+from aiogram.types import Message
+
 
 def update_json(user_id: str, data_gif: dict) -> None:
 
@@ -8,7 +10,7 @@ def update_json(user_id: str, data_gif: dict) -> None:
     old file and upload our modified file"""
 
     path = os.path.join('data', 'data.json')
-    with open(path, 'r+') as file:
+    with open(path, 'r') as file:
         try:                                # Try to open json, if empty
             data = json.load(file)          # set new data
             try:
@@ -42,9 +44,10 @@ def update_json(user_id: str, data_gif: dict) -> None:
     # print(data)
 
 
-def load_gifs_data(user_id: str) -> dict | None:
+def load_gifs_data(message: Message) -> dict | None:
+    user_id = str(message.from_user.id)
     path = os.path.join('data', 'data.json')
-    with open(path, 'r+') as file:
+    with open(path, 'r') as file:
         try:
             data = json.load(file)
             gifs_data = data[user_id]['gifs_data']
@@ -53,8 +56,8 @@ def load_gifs_data(user_id: str) -> dict | None:
             return None
 
 
-def get_all_tags(user_id: str) -> str | None:
-    all_gifs_data = load_gifs_data(user_id)
+def get_all_tags(message: Message) -> str | None:
+    all_gifs_data = load_gifs_data(message)
     if all_gifs_data is None:
         return None
 
@@ -63,7 +66,18 @@ def get_all_tags(user_id: str) -> str | None:
     return all_user_gif_tags
 
 
-def gif_finding():
-    path = os.path.join('data', 'data.json')
-    with open(path, 'r'):
-        ...
+def get_all_tags_separated(message: Message) -> str | None:
+    all_gifs_data = load_gifs_data(message)
+    if all_gifs_data is None:
+        return None
+
+    all_user_gif_tags = '; '.join([', '.join(one_gif_data['gif_tags']) for one_gif_data in all_gifs_data.values()])
+
+    return all_user_gif_tags
+
+
+def gif_finding(message: Message):
+    all_gifs_data = load_gifs_data(message)
+    if all_gifs_data is None:
+        return None
+
