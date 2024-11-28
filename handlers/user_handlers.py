@@ -61,7 +61,7 @@ async def send_all_tags(message: Message):
 
 @router.message(Command('find'), StateFilter(default_state))
 async def start_finding_gif_by_tags(message: Message, state: FSMContext):
-    all_tags = get_all_tags(message)
+    all_tags = get_all_tags_separated(message)
     if all_tags is None:
         await message.answer(lang_ru['no_gifs'])
         return
