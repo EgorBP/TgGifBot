@@ -21,6 +21,11 @@ async def start_command_answer(message: Message, state: FSMContext):
     await message.answer(lang_ru['/start'])
 
 
+@router.message(Command('help'), StateFilter(default_state))
+async def help_command_answer(message: Message):
+    await message.answer(lang_ru['/help'])
+
+
 @router.message(Command('cancel'), StateFilter(FSMGifRegister.gif_tag))
 async def stop_adding(message: Message, state: FSMContext):
     await state.clear()
