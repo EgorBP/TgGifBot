@@ -4,7 +4,7 @@ import os
 from aiogram.types import Message
 
 
-def update_json(user_id: str, data_gif: dict) -> None:
+def update_json_by_new_gif(user_id: str, gif_data: dict) -> None:
 
     """We download json into the dict, change what we need in it, clear it
     old file and upload our modified file"""
@@ -31,8 +31,8 @@ def update_json(user_id: str, data_gif: dict) -> None:
 
     new_gif_data = {
         f'gif_{data[user_id]['total_saved_gifs']}':
-            {'gif_id': data_gif['gif_id'],
-             'gif_tags': data_gif['gif_tag']}
+            {'gif_id': gif_data['gif_id'],
+             'gif_tags': gif_data['gif_tag']}
     }
 
     old_gif_data = data[user_id]['gifs_data']
@@ -44,16 +44,32 @@ def update_json(user_id: str, data_gif: dict) -> None:
     # print(data)
 
 
-def load_gifs_data(message: Message) -> dict | None:
+def update_json_by_deleting_gif(new_data: dict):
+    path = os.path.join('data', 'data.json')
+    with open(path, 'w') as file:
+        json.dump(new_data, file, indent=4, ensure_ascii=False)
+
+
+def load_all_data(message: Message) -> dict | None:
     user_id = str(message.from_user.id)
     path = os.path.join('data', 'data.json')
     with open(path, 'r') as file:
         try:
             data = json.load(file)
-            gifs_data = data[user_id]['gifs_data']
-            return gifs_data
+            return data
         except (json.JSONDecodeError, KeyError):
             return None
+
+
+
+def load_gifs_data(message: Message) -> dict | None:
+    user_id = str(message.from_user.id)
+    all_data = load_all_data(message)
+    if all_data is None or all_data == {}:
+        return None
+
+    gifs_data = all_data[user_id]['gifs_data']
+    return gifs_data
 
 
 def get_all_tags(message: Message) -> str | None:

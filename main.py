@@ -5,10 +5,10 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.methods import set_chat_menu_button
 
-from handlers import user_handlers, functional_handlers
+from handlers import user_handlers, functional_handlers, callback_handlers
 from states import storage
 from config import load_config
-from keyboards import MainMenuButton
+from keyboards import BotMainMenuButton
 
 
 async def main():
@@ -23,12 +23,13 @@ async def main():
     dp = Dispatcher(storage=storage)
     dp.include_routers(
         user_handlers.router,
-        functional_handlers.router
+        functional_handlers.router,
+        callback_handlers.router,
     )
 
     await bot.delete_webhook(drop_pending_updates=True)
 
-    dp.startup.register(MainMenuButton.set_commands)
+    dp.startup.register(BotMainMenuButton.set_commands)
     await dp.start_polling(bot)
 
 
