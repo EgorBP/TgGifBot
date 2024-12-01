@@ -101,7 +101,7 @@ async def send_all_gifs(message: Message):
 )
 async def send_all_tags(message: Message):
     all_tags = get_all_tags_separated(message)
-    if all_tags is None or all_tags == {}:
+    if all_tags is None or all_tags == '':
         await message.answer(lang_ru['no_gifs_or_tags'])
         return
 
@@ -114,7 +114,7 @@ async def send_all_tags(message: Message):
 )
 async def start_finding_gif_by_tags(message: Message, state: FSMContext):
     all_tags = get_all_tags_separated(message)
-    if all_tags is None or all_tags == {}:
+    if all_tags is None or all_tags == '':
         await message.answer(lang_ru['no_gifs'])
         return
 
