@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -33,5 +34,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    print('Successfully started!')
+    print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Successfully started!")
     asyncio.run(main())
