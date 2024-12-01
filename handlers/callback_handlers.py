@@ -40,7 +40,7 @@ async def callback_deleting(callback: CallbackQuery):
 @router.callback_query(F.data.split(':')[0] == 'modify', StateFilter(default_state))
 async def callback_modifying_start(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_caption(caption=f'➡️{callback.message.caption}⬅️\n'
-                                                f'{lang_ru['now_edit']}')
+                                                f'{lang_ru["now_edit"]}')
 
     await state.set_state(FSMUpdatingTags.updating)
     await state.update_data(

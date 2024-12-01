@@ -119,7 +119,7 @@ async def start_finding_gif_by_tags(message: Message, state: FSMContext):
         return
 
     await message.answer(
-        text=f'{lang_ru['start_finding']}\n'
+        text=f'{lang_ru["start_finding"]}\n'
         f'<b>Доступные теги:</b>  {all_tags}',
         reply_markup=reply_keyboard.keyboard_cancel(),
     )
