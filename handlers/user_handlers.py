@@ -150,7 +150,7 @@ async def send_gif_by_tags(message: Message, state: FSMContext):
         if tags_to_find.issubset(gif_tags):
             await message.answer_animation(
                 gif_id,
-                caption=f'<b>Теги:</b>  {', '.join(gif_tags)}',
+                caption=f'<b>Теги:</b>  {", ".join(gif_tags)}',
                 reply_markup=inline_markup.keyboard_gif_edit(),
             )
 
