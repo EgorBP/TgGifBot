@@ -30,7 +30,7 @@ def update_json_by_new_gif(user_id: str, gif_data: dict) -> None:
     data[user_id]['total_saved_gifs'] += 1
 
     new_gif_data = {
-        f'gif_{data[user_id]['total_saved_gifs']}':
+        f'gif_{data[user_id]["total_saved_gifs"]}':
             {'gif_id': gif_data['gif_id'],
              'gif_tags': gif_data['gif_tag']}
     }
