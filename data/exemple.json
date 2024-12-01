@@ -3,9 +3,9 @@
         "total_saved_gifs": 2,
         "gifs_data": {
             "gif_1": {
-                "gif_id": "CgACAgQAAxkBAAIEMWddXzJdvIqgAAHW3HYq7_7kGElyMAACaAoAAnwUUFDDGExYw3cgfTYE",
+                "gif_id": "CgACAgQAAxkBAAOcZ0s89A3GMzg6QhRqiTMgXPFLsJoAAqQEAAKugIVS3ZO5-r_O3OE2BA",
                 "gif_tags": [
-                    "Dhdj"
+                    "#danger"
                 ]
             }
         }
@@ -16,14 +16,14 @@
             "gif_1": {
                 "gif_id": "CgACAgQAAxkBAAID-WdHMVG2jubjUQVwg6i2zc2sbcPYAALjAwAChP99UcPbxshY_uLUNgQ",
                 "gif_tags": [
-                    "cat"
+                    "#cat"
                 ]
             },
             "gif_2": {
                 "gif_id": "CgACAgIAAxkBAAID2mdHK_iy3w1xkhmeaWqlV1VZZQxSAAK8JwACF1tRS0rYtQtkSRbqNgQ",
                 "gif_tags": [
-                    "smile",
-                    "природа"
+                    "#smile",
+                    "#природа"
                 ]
             }
         }

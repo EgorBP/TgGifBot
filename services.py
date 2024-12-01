@@ -6,8 +6,8 @@ from aiogram.types import Message
 
 def update_json_by_new_gif(user_id: str, gif_data: dict) -> None:
 
-    """We download json into the dict, change what we need in it, clear it
-    old file and upload our modified file"""
+    """ We download json into the dict, change what we need in it, clear it
+    old file and upload our modified file """
 
     path = os.path.join('data', 'data.json')
     with open(path, 'r') as file:
@@ -70,16 +70,6 @@ def load_gifs_data(message: Message) -> dict | None:
 
     gifs_data = all_data[user_id]['gifs_data']
     return gifs_data
-
-
-def get_all_tags(message: Message) -> str | None:
-    all_gifs_data = load_gifs_data(message)
-    if all_gifs_data is None:
-        return None
-
-    all_user_gif_tags = ', '.join([', '.join(one_gif_data['gif_tags']) for one_gif_data in all_gifs_data.values()])
-
-    return all_user_gif_tags
 
 
 def get_all_tags_separated(message: Message) -> str | None:

@@ -10,5 +10,9 @@ class FSMGifRegister(StatesGroup):
     gif_tag = State()
 
 
-class FSMOtherStates(StatesGroup):
+class FSMFindingGif(StatesGroup):
     find = State()
+
+
+class FSMUpdatingTags(StatesGroup):
+    updating = State()

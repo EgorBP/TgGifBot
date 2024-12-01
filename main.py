@@ -8,12 +8,11 @@ from aiogram.methods import set_chat_menu_button
 from handlers import user_handlers, functional_handlers, callback_handlers
 from states import storage
 from config import load_config
-from keyboards import BotMainMenuButton
 
 
 async def main():
 
-    """ Питонячий скрипт"""
+    """ Питонячий скрипт """
 
     bot = Bot(
         token=load_config().tg_bot.token,
@@ -29,7 +28,6 @@ async def main():
 
     await bot.delete_webhook(drop_pending_updates=True)
 
-    dp.startup.register(BotMainMenuButton.set_commands)
     await dp.start_polling(bot)
 
 
