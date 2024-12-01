@@ -42,8 +42,3 @@ async def add_tags_to_gif(message: Message, state: FSMContext):
 
     await message.answer(text=lang_ru['successfully_saved'])
     await state.clear()
-
-
-@router.message()
-async def bad_message(message: Message):
-    await message.answer(lang_ru['wrong_message'])

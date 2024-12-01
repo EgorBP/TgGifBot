@@ -1,11 +1,12 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
-from aiogram.types import CallbackQuery, InputMediaAnimation
+from aiogram.types import CallbackQuery, InputMediaAnimation, Message
 from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
 
 from keyboards import BotInlineKeyboard, BotReplyKeyboard
-from services import load_all_data, update_json_by_deleting_gif
+from services import load_all_data, update_json
 from lexicon import lang_ru, lang_ru_reply_buttons
 from states import FSMUpdatingTags
 
@@ -29,7 +30,7 @@ async def callback_deleting(callback: CallbackQuery):
         )
         return
 
-    update_json_by_deleting_gif(data)
+    update_json(data)
 
     await callback.message.edit_caption(
         caption=lang_ru['deleted_gif']
@@ -42,10 +43,36 @@ async def callback_modifying_start(callback: CallbackQuery, state: FSMContext):
                                                 f'{lang_ru['now_edit']}')
 
     await state.set_state(FSMUpdatingTags.updating)
-    await state.update_data(updating=callback.callback.message.caption)
+    await state.update_data(
+        updating=[callback.message.message_id, callback.message.caption, callback.data.split(':')[1]]
+    )
 
     await callback.message.answer(
         text=lang_ru['send_new_gifs'],
         reply_markup=reply_keyboard.keyboard_cancel(),
     )
 
+
+@router.message(~F.text, StateFilter(FSMUpdatingTags.updating))
+async def wrong_msg(message: Message):
+    await message.answer(lang_ru['only_text'])
+
+
+@router.message(StateFilter(FSMUpdatingTags.updating))
+async def modifying_tags(message: Message, state: FSMContext):
+    data = load_all_data(message)
+    gif_name = (await state.get_data())['updating'][2]
+    user_id = str(message.from_user.id)
+
+    new_tags: list[str] = message.text.replace('#', '').split(',')
+    new_tags: list[str] = [f'#{tag.strip()}' for tag in new_tags]
+
+    data[user_id]['gifs_data'][gif_name]['gif_tags'] = new_tags
+
+    update_json(data)
+
+    await state.clear()
+    await message.answer(
+        text=lang_ru['new_tags'],
+        reply_markup=reply_keyboard.keyboard_main(),
+    )

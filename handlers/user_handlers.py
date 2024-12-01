@@ -37,7 +37,18 @@ async def help_command_answer(message: Message):
     or_f(Command('cancel'), F.text.startswith(lang_ru_reply_buttons['cancel'])),
     StateFilter(FSMUpdatingTags.updating)
 )
-async def stop_adding(message: Message, state: FSMContext):
+async def stop_updating_tags(message: Message, state: FSMContext):
+    caption_data = (await state.get_data())['updating']
+    bot = message.bot
+    inline_keyboard = BotInlineKeyboard(caption_data[2])
+
+    await bot.edit_message_caption(
+        chat_id=message.chat.id,
+        message_id=caption_data[0],
+        caption=caption_data[1],
+        reply_markup=inline_keyboard.keyboard_gif_edit(),
+    )
+
     await state.clear()
     await message.answer(
         text=lang_ru['cancel_process'],

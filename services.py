@@ -44,7 +44,7 @@ def update_json_by_new_gif(user_id: str, gif_data: dict) -> None:
     # print(data)
 
 
-def update_json_by_deleting_gif(new_data: dict):
+def update_json(new_data: dict):
     path = os.path.join('data', 'data.json')
     with open(path, 'w') as file:
         json.dump(new_data, file, indent=4, ensure_ascii=False)
