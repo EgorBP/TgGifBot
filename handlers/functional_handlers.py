@@ -10,6 +10,7 @@ from services import update_json_by_new_gif
 
 
 router = Router()
+reply_keyboard = BotReplyKeyboard()
 
 
 @router.message(F.animation, StateFilter(default_state))
@@ -20,7 +21,10 @@ async def gif_answer(msg: Message, state: FSMContext):
 
     await state.update_data(gif_id=gif_id)
 
-    await msg.answer(text=lang_ru['now_send_tags'])
+    await msg.answer(
+        text=lang_ru['now_send_tags'],
+        reply_markup=reply_keyboard.keyboard_cancel(),
+    )
     await state.set_state(FSMGifRegister.gif_tag)
 
 
