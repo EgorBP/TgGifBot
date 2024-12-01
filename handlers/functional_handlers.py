@@ -7,6 +7,7 @@ from aiogram.fsm.state import default_state
 from lexicon import lang_ru, lang_ru_reply_buttons
 from states import FSMGifRegister
 from services import update_json_by_new_gif
+from keyboards import BotReplyKeyboard
 
 
 router = Router()
