@@ -142,16 +142,29 @@ async def send_gif_by_tags(message: Message, state: FSMContext):
     tags_to_find: list[str] = message.text.replace('#', '').split(',')
     tags_to_find: set[str] = set([f'#{tag.strip()}' for tag in tags_to_find])
 
+    count = 0
     for gif_name in gifs_data.keys():
         gif_id = gifs_data[gif_name]['gif_id']
         gif_tags = set(gifs_data[gif_name]['gif_tags'])
-        inline_markup = BotInlineKeyboard(gif_id)
+        inline_markup = BotInlineKeyboard(gif_name)
 
         if tags_to_find.issubset(gif_tags):
+            count += 1
             await message.answer_animation(
                 gif_id,
                 caption=f'<b>Теги:</b>  {", ".join(gif_tags)}',
                 reply_markup=inline_markup.keyboard_gif_edit(),
             )
+
+    if not count:
+        await message.answer(
+            text=lang_ru['nothing_founded'],
+            reply_markup=reply_keyboard.keyboard_main(),
+        )
+    else:
+        await message.answer(
+            text=lang_ru['all'],
+            reply_markup=reply_keyboard.keyboard_main(),
+        )
 
     await state.clear()

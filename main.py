@@ -3,7 +3,6 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.methods import set_chat_menu_button
 
 from handlers import user_handlers, functional_handlers, callback_handlers, other_handlers
 from states import storage
@@ -16,7 +15,8 @@ async def main():
 
     bot = Bot(
         token=load_config().tg_bot.token,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+        # session=load_config().tg_bot.session,
     )
 
     dp = Dispatcher(storage=storage)
