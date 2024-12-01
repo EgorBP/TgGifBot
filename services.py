@@ -68,7 +68,11 @@ def load_gifs_data(message: Message) -> dict | None:
     if all_data is None or all_data == {}:
         return None
 
-    gifs_data = all_data[user_id]['gifs_data']
+    try:
+        gifs_data = all_data[user_id]['gifs_data']
+    except KeyError:
+        return None
+
     return gifs_data
 
 

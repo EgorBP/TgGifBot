@@ -45,5 +45,8 @@ async def add_tags_to_gif(message: Message, state: FSMContext):
 
     update_json_by_new_gif(user_id, data)
 
-    await message.answer(text=lang_ru['successfully_saved'])
+    await message.answer(
+        text=lang_ru['successfully_saved'],
+        reply_markup=reply_keyboard.keyboard_main(),
+    )
     await state.clear()
