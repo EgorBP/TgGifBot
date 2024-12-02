@@ -6,7 +6,6 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from handlers import user_handlers, functional_handlers, callback_handlers, other_handlers
-from keyboards import BotMainMenuButton
 from states import storage
 from config import load_config
 
@@ -30,7 +29,6 @@ async def main():
     )
 
     await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_my_commands(bot.BotMainMenuButton.set_commands())
     await dp.start_polling(bot)
 
 
