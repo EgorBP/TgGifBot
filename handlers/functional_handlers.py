@@ -30,14 +30,14 @@ async def gif_answer(msg: Message, state: FSMContext):
 
 
 @router.message(StateFilter(FSMGifRegister.gif_tag), ~F.text)
-async def add_tags_to_gif(message: Message):
+async def add_tags_to_gif_bad_message(message: Message):
     await message.answer(lang_ru['only_text'])
 
 
 @router.message(StateFilter(FSMGifRegister.gif_tag))
 async def add_tags_to_gif(message: Message, state: FSMContext):
     tags: list[str] = message.text.replace('#', '').split(',')
-    tags: list[str] = [f'#{tag.strip()}' for tag in tags]
+    tags: list[str] = [f'#{tag.strip().lower()}' for tag in tags]
     await state.update_data(gif_tag=tags)
 
     data = await state.get_data()               # In json int was always

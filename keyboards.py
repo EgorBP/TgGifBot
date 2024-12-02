@@ -33,6 +33,7 @@ class BotReplyKeyboard:
     def __init__(self, lang: dict = lang_ru_inline_buttons):
         self._reply_buttons_main_menu = [
             [
+                KeyboardButton(text=lang_ru_reply_buttons['save_gifs']),
                 KeyboardButton(text=lang_ru_reply_buttons['find']),
             ],
             [
@@ -41,6 +42,13 @@ class BotReplyKeyboard:
             ],
         ]
         self._reply_button_cancel = [[KeyboardButton(text=lang_ru_reply_buttons['cancel'])]]
+
+        self._reply_buttons_gif_saving = [
+            [
+                KeyboardButton(text=lang_ru_reply_buttons['cancel']),
+                KeyboardButton(text=lang_ru_reply_buttons['now_tags']),
+            ],
+        ]
 
     def remove(self):
         return ReplyKeyboardRemove()
@@ -54,5 +62,11 @@ class BotReplyKeyboard:
     def keyboard_cancel(self):
         return ReplyKeyboardMarkup(
             keyboard=self._reply_button_cancel,
+            resize_keyboard=True,
+        )
+
+    def keyboard_gif_saving(self):
+        return ReplyKeyboardMarkup(
+            keyboard=self._reply_buttons_gif_saving,
             resize_keyboard=True,
         )

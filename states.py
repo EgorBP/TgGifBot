@@ -16,3 +16,8 @@ class FSMFindingGif(StatesGroup):
 
 class FSMUpdatingTags(StatesGroup):
     updating = State()
+
+
+class FSMGifSaving(StatesGroup):
+    gifs_id = State()
+    gifs_tags = State()

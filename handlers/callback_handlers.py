@@ -63,15 +63,24 @@ async def modifying_tags(message: Message, state: FSMContext):
     data = load_all_data(message)
     gif_name = (await state.get_data())['updating'][2]
     user_id = str(message.from_user.id)
+    bot = message.bot
+    caption_data = (await state.get_data())['updating']
+    inline_keyboard = BotInlineKeyboard(caption_data[2])
 
     new_tags: list[str] = message.text.replace('#', '').split(',')
-    new_tags: list[str] = [f'#{tag.strip()}' for tag in new_tags]
+    new_tags: list[str] = [f'#{tag.strip().lower()}' for tag in new_tags]
 
     data[user_id]['gifs_data'][gif_name]['gif_tags'] = new_tags
 
     update_json(data)
 
     await state.clear()
+    await bot.edit_message_caption(
+        chat_id=message.chat.id,
+        message_id=caption_data[0],
+        caption=caption_data[1],
+        reply_markup=inline_keyboard.keyboard_gif_edit(),
+    )
     await message.answer(
         text=lang_ru['new_tags'],
         reply_markup=reply_keyboard.keyboard_main(),
