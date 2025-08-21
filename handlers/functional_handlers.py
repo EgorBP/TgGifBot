@@ -4,10 +4,11 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 
-from lexicon import lang_ru, lang_ru_reply_buttons
+from lexicon import lang_ru
 from states import FSMGifRegister
 from services import update_user_gif_tags
 from keyboards import BotReplyKeyboard
+from utils import execute_tags_from_message
 
 
 router = Router()
@@ -36,8 +37,7 @@ async def add_tags_to_gif_bad_message(message: Message):
 
 @router.message(StateFilter(FSMGifRegister.gif_tags))
 async def add_tags_to_gif(message: Message, state: FSMContext):
-    tags: list[str] = message.text.replace('#', '').split(',')
-    tags: list[str] = [f'{tag.strip().lower()}' for tag in tags]
+    tags: list[str] = execute_tags_from_message(message.text)
     await state.update_data(gif_tags=tags)
 
     data = await state.get_data()

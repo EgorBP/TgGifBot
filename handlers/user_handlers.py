@@ -5,10 +5,10 @@ from aiogram.fsm.state import default_state
 from aiogram.fsm.context import FSMContext
 
 from lexicon import lang_ru, lang_ru_reply_buttons
-from states import FSMGifRegister, FSMFindingGif, FSMUpdatingTags, FSMGifSaving
-from services import update_user_gif_tags, search_user_gifs
+from states import FSMFindingGif, FSMUpdatingTags, FSMGifSaving
+from services import update_user_gif_tags, search_user_gifs, get_all_user_tags
 from keyboards import BotMainMenuButton, BotInlineKeyboard, BotReplyKeyboard
-from utils import prepare_tags
+from utils import prepare_tags_to_send, execute_tags_from_message
 
 
 router = Router()
@@ -23,7 +23,6 @@ async def start_command_answer(message: Message, state: FSMContext):
         text=lang_ru['/start'],
         reply_markup=reply_keyboard.keyboard_main(),
     )
-
 
 
 @router.message(Command('help'), StateFilter(default_state))
@@ -100,7 +99,7 @@ async def gifs_saving(message: Message, state: FSMContext):
 )
 async def start_tags_gifs_saving(message: Message, state: FSMContext):
     try:
-        check = (await state.get_data())['gifs_id']
+        # check = (await state.get_data())['gifs_id']
         await state.set_state(FSMGifSaving.gifs_tags)
         await message.answer(
             text=lang_ru['now_tags'],
@@ -125,34 +124,21 @@ async def tags_gifs_saving_bad_message(message: Message):
     StateFilter(FSMGifSaving.gifs_tags),
 )
 async def tags_gifs_saving(message: Message, state: FSMContext):
-    gifs_tags: list[str] = message.text.replace('#', '').split(',')
-    gifs_tags: list[str] = [f'#{tag.strip().lower()}' for tag in gifs_tags]
+    gifs_tags: list[str] = execute_tags_from_message(message.text)
     await state.update_data(gifs_tags=gifs_tags)
 
     gifs_data = await state.get_data()
-    user_id = str(message.from_user.id)
-
-    json_data = load_all_data(message)
-    if json_data is None:
-        json_data = {user_id: {
-            'total_saved_gifs': 0,
-            'gifs_data': {}
-        }}
-
+    user_id = message.from_user.id
 
     for gif_id in gifs_data['gifs_id']:
-        json_data[user_id]['total_saved_gifs'] += 1
-
-        new_gif_data = {
-            f'gif_{json_data[user_id]["total_saved_gifs"]}':
-                {'gif_id': gif_id,
-                 'gif_tags': gifs_data['gifs_tags']}
-        }
-
-        json_data[user_id]['gifs_data'].update(new_gif_data)
-
-    print(json_data)
-    update_json(json_data)
+        response = await update_user_gif_tags(user_id, gif_id, gifs_tags)
+        if response.status != 200:
+            await message.answer(
+                text=lang_ru['partly_saved'],
+                reply_markup=reply_keyboard.keyboard_main(),
+            )
+            await state.clear()
+            return
 
     await message.answer(
         text=lang_ru['successfully_saved'],
@@ -194,7 +180,7 @@ async def send_all_gifs(message: Message):
 
     for gif_data in data['gifs_data']:
         inline_markup = BotInlineKeyboard(gif_data['id'])
-        tags = prepare_tags(gif_data['tags'])
+        tags = prepare_tags_to_send(gif_data['tags'])
         await message.answer_animation(
             gif_data['tg_gif_id'],
             caption=f'<b>Теги:</b>  {tags}',
@@ -215,8 +201,11 @@ async def not_now_sending(message: Message):
     StateFilter(default_state),
 )
 async def send_all_tags(message: Message):
-    all_tags = get_all_tags_separated(message)
-    if all_tags is None or all_tags == '':
+    response = await get_all_user_tags(message.from_user.id)
+
+    if response.status == 200:
+        all_tags = prepare_tags_to_send(response.data)
+    else:
         await message.answer(lang_ru['no_gifs_or_tags'])
         return
 
@@ -228,13 +217,15 @@ async def send_all_tags(message: Message):
     StateFilter(default_state),
 )
 async def start_finding_gif_by_tags(message: Message, state: FSMContext):
-    all_tags = 'get_all_tags_separated(message)'
-    if all_tags is None or all_tags == '':
-        await message.answer(lang_ru['no_gifs'])
-        return
+    response = await get_all_user_tags(message.from_user.id)
+
+    if response.status == 200:
+        all_tags = prepare_tags_to_send(response.data)
+    else:
+        all_tags = ''
 
     await message.answer(
-        text=f'{lang_ru["start_finding"]}\n'
+        text=f'{lang_ru["start_finding"]}\n\n'
         f'<b>Доступные теги:</b>  {all_tags}',
         reply_markup=reply_keyboard.keyboard_cancel(),
     )
@@ -249,8 +240,7 @@ async def send_gif_by_tags_wrong_message(message: Message):
 
 @router.message(StateFilter(FSMFindingGif.find), F.text)
 async def send_gif_by_tags(message: Message, state: FSMContext):
-    tags_to_find: list[str] = message.text.replace('#', '').split(',')
-    tags_to_find: list[str] = [f'{tag.strip().lower()}' for tag in tags_to_find]
+    tags_to_find: list[str] = execute_tags_from_message(message.text)
 
     response = await search_user_gifs(message.from_user.id, tags_to_find)
 
@@ -274,7 +264,7 @@ async def send_gif_by_tags(message: Message, state: FSMContext):
 
     for gif_data in data['gifs_data']:
         inline_markup = BotInlineKeyboard(gif_data['id'])
-        tags = prepare_tags(gif_data['tags'])
+        tags = prepare_tags_to_send(gif_data['tags'])
         await message.answer_animation(
             gif_data['tg_gif_id'],
             caption=f'<b>Теги:</b>  {tags}',

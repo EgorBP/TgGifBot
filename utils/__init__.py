@@ -1,1 +1,1 @@
-from .text_helpers import prepare_tags
+from .text_helpers import prepare_tags_to_send, execute_tags_from_message
