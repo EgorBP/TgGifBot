@@ -7,17 +7,14 @@ from aiogram.enums import ParseMode
 
 from handlers import user_handlers, functional_handlers, callback_handlers, other_handlers
 from states import storage
-from config import load_config
+from config import config
 
 
 async def main():
-
-    """ Питонячий скрипт """
-
     bot = Bot(
-        token=load_config().tg_bot.token,
+        token=config.tg_bot.token,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-        # session=load_config().tg_bot.session,
+        # session=config.tg_bot.session,
     )
 
     dp = Dispatcher(storage=storage)

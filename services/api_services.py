@@ -1,0 +1,30 @@
+from config import config
+from typing import Sequence
+import aiohttp
+from types import SimpleNamespace
+
+
+async def search_user_gifs(tg_user_id: int, gif_tags: Sequence[str] | None = None):
+    async with aiohttp.ClientSession() as session:
+        if gif_tags:
+            tags_request = '&tags=' + '&tags='.join(gif_tags)
+        else:
+            tags_request = ''
+        async with session.get(f'{config.api_base_url}/search?tg_user_id={tg_user_id}{tags_request}') as response:
+            data = await response.json()
+            return SimpleNamespace(data=data, status=response.status)
+
+
+async def update_user_gif_tags(tg_user_id: int, tg_gif_id: str, gif_tags: Sequence[str]):
+    async with aiohttp.ClientSession() as session:
+        data_json = {'tags': gif_tags}
+        async with session.put(f'{config.api_base_url}/user/{tg_user_id}/gif/{tg_gif_id}', json=data_json) as response:
+            data = await response.json()
+            return SimpleNamespace(data=data, status=response.status)
+
+
+async def get_all_user_tags(tg_user_id: int):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'{config.api_base_url}/user/{tg_user_id}/tags') as response:
+            data = await response.json()
+            return SimpleNamespace(data=data, status=response.status)

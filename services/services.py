@@ -4,12 +4,18 @@ import os
 from aiogram.types import Message
 
 
+"""
+Это старый файл, не используйте эти функции.
+Раньше бот сохранял данные в json, а сейчас работает через API.
+"""
+
+
 def update_json_by_new_gif(user_id: str, gif_data: dict) -> None:
 
     """ We download json into the dict, change what we need in it, clear it
     old file and upload our modified file """
 
-    path = os.path.join('data', 'data.json')
+    path = os.path.join('../data', 'data.json')
     with open(path, 'r') as file:
         try:                                # Try to open json, if empty
             data = json.load(file)          # set new data
@@ -45,14 +51,14 @@ def update_json_by_new_gif(user_id: str, gif_data: dict) -> None:
 
 
 def update_json(new_data: dict):
-    path = os.path.join('data', 'data.json')
+    path = os.path.join('../data', 'data.json')
     with open(path, 'w') as file:
         json.dump(new_data, file, indent=4, ensure_ascii=False)
 
 
 def load_all_data(message: Message) -> dict | None:
     user_id = str(message.from_user.id)
-    path = os.path.join('data', 'data.json')
+    path = os.path.join('../data', 'data.json')
     with open(path, 'r') as file:
         try:
             data = json.load(file)

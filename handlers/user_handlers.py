@@ -1,6 +1,3 @@
-import json
-import os
-
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter, or_f
 from aiogram.types import Message
@@ -9,8 +6,9 @@ from aiogram.fsm.context import FSMContext
 
 from lexicon import lang_ru, lang_ru_reply_buttons
 from states import FSMGifRegister, FSMFindingGif, FSMUpdatingTags, FSMGifSaving
-from services import load_gifs_data, get_all_tags_separated, load_all_data, update_json
+from services import update_user_gif_tags, search_user_gifs
 from keyboards import BotMainMenuButton, BotInlineKeyboard, BotReplyKeyboard
+from utils import prepare_tags
 
 
 router = Router()
@@ -176,19 +174,30 @@ async def not_now_sending(message: Message):
     StateFilter(default_state),
 )
 async def send_all_gifs(message: Message):
-    gifs_data = load_gifs_data(message)
-    if gifs_data is None or gifs_data == {}:
-        await message.answer(lang_ru['no_gifs'])
+    response = await search_user_gifs(message.from_user.id)
+
+    if response.status != 200:
+        await message.answer(
+            text=lang_ru['error'],
+            reply_markup=reply_keyboard.keyboard_main(),
+        )
         return
 
-    for gif_name in gifs_data.keys():
-        gif_id = gifs_data[gif_name]['gif_id']
-        gif_tags = ', '.join(gifs_data[gif_name]['gif_tags'])
-        inline_markup = BotInlineKeyboard(gif_name)
+    data = response.data
 
+    if not data['gifs_data']:
+        await message.answer(
+            text=lang_ru['nothing_founded'],
+            reply_markup=reply_keyboard.keyboard_main(),
+        )
+        return
+
+    for gif_data in data['gifs_data']:
+        inline_markup = BotInlineKeyboard(gif_data['id'])
+        tags = prepare_tags(gif_data['tags'])
         await message.answer_animation(
-            gif_id,
-            caption=f'<b>Теги:</b>  {gif_tags}',
+            gif_data['tg_gif_id'],
+            caption=f'<b>Теги:</b>  {tags}',
             reply_markup=inline_markup.keyboard_gif_edit(),
         )
 
@@ -219,7 +228,7 @@ async def send_all_tags(message: Message):
     StateFilter(default_state),
 )
 async def start_finding_gif_by_tags(message: Message, state: FSMContext):
-    all_tags = get_all_tags_separated(message)
+    all_tags = 'get_all_tags_separated(message)'
     if all_tags is None or all_tags == '':
         await message.answer(lang_ru['no_gifs'])
         return
@@ -240,37 +249,40 @@ async def send_gif_by_tags_wrong_message(message: Message):
 
 @router.message(StateFilter(FSMFindingGif.find), F.text)
 async def send_gif_by_tags(message: Message, state: FSMContext):
-    gifs_data = load_gifs_data(message)
-    if gifs_data is None or gifs_data == {}:
-        await message.answer(lang_ru['no_gifs'])
+    tags_to_find: list[str] = message.text.replace('#', '').split(',')
+    tags_to_find: list[str] = [f'{tag.strip().lower()}' for tag in tags_to_find]
+
+    response = await search_user_gifs(message.from_user.id, tags_to_find)
+
+    if response.status != 200:
+        await message.answer(
+            text=lang_ru['error'],
+            reply_markup=reply_keyboard.keyboard_main(),
+        )
+        await state.clear()
         return
 
-    tags_to_find: list[str] = message.text.replace('#', '').split(',')
-    tags_to_find: set[str] = set([f'#{tag.strip().lower()}' for tag in tags_to_find])
+    data = response.data
 
-    count = 0
-    for gif_name in gifs_data.keys():
-        gif_id = gifs_data[gif_name]['gif_id']
-        gif_tags = set(gifs_data[gif_name]['gif_tags'])
-        inline_markup = BotInlineKeyboard(gif_name)
-
-        if tags_to_find.issubset(gif_tags):
-            count += 1
-            await message.answer_animation(
-                gif_id,
-                caption=f'<b>Теги:</b>  {", ".join(gif_tags)}',
-                reply_markup=inline_markup.keyboard_gif_edit(),
-            )
-
-    if not count:
+    if not data['gifs_data']:
         await message.answer(
             text=lang_ru['nothing_founded'],
             reply_markup=reply_keyboard.keyboard_main(),
         )
-    else:
-        await message.answer(
-            text=lang_ru['all'],
-            reply_markup=reply_keyboard.keyboard_main(),
+        await state.clear()
+        return
+
+    for gif_data in data['gifs_data']:
+        inline_markup = BotInlineKeyboard(gif_data['id'])
+        tags = prepare_tags(gif_data['tags'])
+        await message.answer_animation(
+            gif_data['tg_gif_id'],
+            caption=f'<b>Теги:</b>  {tags}',
+            reply_markup=inline_markup.keyboard_gif_edit(),
         )
 
+    await message.answer(
+        text=lang_ru['all'],
+        reply_markup=reply_keyboard.keyboard_main(),
+    )
     await state.clear()

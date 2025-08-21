@@ -7,7 +7,7 @@ storage = MemoryStorage()
 
 class FSMGifRegister(StatesGroup):
     gif_id = State()
-    gif_tag = State()
+    gif_tags = State()
 
 
 class FSMFindingGif(StatesGroup):

@@ -1,13 +1,12 @@
 from aiogram import Router, F
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
-from aiogram.types import CallbackQuery, InputMediaAnimation, Message
+from aiogram.types import CallbackQuery, Message
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from keyboards import BotInlineKeyboard, BotReplyKeyboard
-from services import load_all_data, update_json
-from lexicon import lang_ru, lang_ru_reply_buttons
+from services import update_user_gif_tags, search_user_gifs
+from lexicon import lang_ru
 from states import FSMUpdatingTags
 
 

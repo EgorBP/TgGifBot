@@ -12,12 +12,17 @@ class TgBot:
 @dataclass
 class Config:
     tg_bot: TgBot
+    api_base_url: str
 
 
 def load_config(path: str | None = None) -> Config:
     env = Env()
     env.read_env(path)
 
+    # Использовалось при заливке на PythonAnywhere
     session = AiohttpSession(proxy='http://proxy.server:3128')
 
-    return Config(tg_bot=TgBot(token=env('BOT_TOKEN'), session=session))
+    return Config(
+        tg_bot=TgBot(token=env('BOT_TOKEN'), session=session),
+        api_base_url=env('API_BASE_URL')
+    )
