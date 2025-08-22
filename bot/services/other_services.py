@@ -1,5 +1,5 @@
 from aiogram.types import Message
-from keyboards import BotInlineKeyboard
+from bot.keyboards import BotInlineKeyboard
 
 
 async def send_gif_with_inline_keyboard(message: Message, tg_gif_id: str, tags: list[str], inline_markup: BotInlineKeyboard):

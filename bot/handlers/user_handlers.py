@@ -4,11 +4,11 @@ from aiogram.types import Message
 from aiogram.fsm.state import default_state
 from aiogram.fsm.context import FSMContext
 
-from lexicon import lang_ru, lang_ru_reply_buttons
-from states import FSMFindingGif, FSMUpdatingTags, FSMGifSaving
-from services import update_user_gif_tags, search_user_gifs, get_all_user_tags, send_gif_with_inline_keyboard
-from keyboards import BotMainMenuButton, BotInlineKeyboard, BotReplyKeyboard
-from utils import prepare_tags_to_send, execute_tags_from_message
+from bot.lexicon import lang_ru, lang_ru_reply_buttons
+from bot.states import FSMFindingGif, FSMUpdatingTags, FSMGifSaving
+from bot.services import update_user_gif_tags, search_user_gifs, get_all_user_tags, send_gif_with_inline_keyboard
+from bot.keyboards import BotMainMenuButton, BotInlineKeyboard, BotReplyKeyboard
+from bot.utils import prepare_tags_to_send, execute_tags_from_message
 import asyncio
 
 
@@ -100,7 +100,7 @@ async def gifs_saving(message: Message, state: FSMContext):
 )
 async def start_tags_gifs_saving(message: Message, state: FSMContext):
     try:
-        # check = (await state.get_data())['gifs_id']
+        check = (await state.get_data())['gifs_id']
         await state.set_state(FSMGifSaving.gifs_tags)
         await message.answer(
             text=lang_ru['now_tags'],

@@ -5,9 +5,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from handlers import user_handlers, functional_handlers, callback_handlers, other_handlers
+from bot.handlers import callback_handlers, other_handlers
+from bot.handlers import functional_handlers, user_handlers
 from states import storage
-from config import config
+from bot.config import config
 
 
 async def main():

@@ -4,11 +4,11 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 
-from lexicon import lang_ru
-from states import FSMGifRegister
-from services import update_user_gif_tags
-from keyboards import BotReplyKeyboard
-from utils import execute_tags_from_message
+from bot.lexicon import lang_ru
+from bot.states import FSMGifRegister
+from bot.services import update_user_gif_tags
+from bot.keyboards import BotReplyKeyboard
+from bot.utils import execute_tags_from_message
 
 
 router = Router()

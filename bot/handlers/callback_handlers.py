@@ -1,16 +1,14 @@
-from http.client import responses
-
 from aiogram import Router, F
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
-from keyboards import BotInlineKeyboard, BotReplyKeyboard
-from services import update_user_gif_tags, delete_user_gif
-from lexicon import lang_ru
-from states import FSMUpdatingTags
-from utils import prepare_tags_to_send, execute_tags_from_message
+from bot.keyboards import BotInlineKeyboard, BotReplyKeyboard
+from bot.services import update_user_gif_tags, delete_user_gif
+from bot.lexicon import lang_ru
+from bot.states import FSMUpdatingTags
+from bot.utils import prepare_tags_to_send, execute_tags_from_message
 
 
 router = Router()

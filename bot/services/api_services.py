@@ -1,7 +1,7 @@
-from config import config
+from bot.config import config
 from typing import Sequence
 import aiohttp
-from schemas import ResponseModel
+from bot.schemas import ResponseModel
 
 
 async def search_user_gifs(tg_user_id: int, gif_tags: Sequence[str] | None = None):

@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
 
-from lexicon import lang_ru
+from bot.lexicon import lang_ru
 
 
 router = Router()
