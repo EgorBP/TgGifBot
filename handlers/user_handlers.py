@@ -132,7 +132,7 @@ async def tags_gifs_saving(message: Message, state: FSMContext):
 
     for gif_id in gifs_data['gifs_id']:
         response = await update_user_gif_tags(user_id, gif_id, gifs_tags)
-        if response.status != 200:
+        if response.code != 200:
             await message.answer(
                 text=lang_ru['partly_saved'],
                 reply_markup=reply_keyboard.keyboard_main(),
@@ -162,9 +162,9 @@ async def not_now_sending(message: Message):
 async def send_all_gifs(message: Message):
     response = await search_user_gifs(message.from_user.id)
 
-    if response.status != 200:
+    if response.code != 200:
         await message.answer(
-            text=lang_ru['error'],
+            text=lang_ru['no_gifs'],
             reply_markup=reply_keyboard.keyboard_main(),
         )
         return
@@ -203,7 +203,7 @@ async def not_now_sending(message: Message):
 async def send_all_tags(message: Message):
     response = await get_all_user_tags(message.from_user.id)
 
-    if response.status == 200:
+    if response.code == 200:
         all_tags = prepare_tags_to_send(response.data)
     else:
         await message.answer(lang_ru['no_gifs_or_tags'])
@@ -219,10 +219,11 @@ async def send_all_tags(message: Message):
 async def start_finding_gif_by_tags(message: Message, state: FSMContext):
     response = await get_all_user_tags(message.from_user.id)
 
-    if response.status == 200:
+    if response.code == 200:
         all_tags = prepare_tags_to_send(response.data)
     else:
-        all_tags = ''
+        await message.answer(lang_ru['no_gifs_or_tags'])
+        return
 
     await message.answer(
         text=f'{lang_ru["start_finding"]}\n\n'
@@ -244,9 +245,9 @@ async def send_gif_by_tags(message: Message, state: FSMContext):
 
     response = await search_user_gifs(message.from_user.id, tags_to_find)
 
-    if response.status != 200:
+    if response.code != 200:
         await message.answer(
-            text=lang_ru['error'],
+            text=lang_ru['no_gifs'],
             reply_markup=reply_keyboard.keyboard_main(),
         )
         await state.clear()

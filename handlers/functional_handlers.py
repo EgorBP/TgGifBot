@@ -48,7 +48,7 @@ async def add_tags_to_gif(message: Message, state: FSMContext):
 
     response = await update_user_gif_tags(user_id, gif_id, gif_tags)
 
-    if response.status == 200:
+    if response.code == 200:
         await message.answer(
             text=lang_ru['successfully_saved'],
             reply_markup=reply_keyboard.keyboard_main(),

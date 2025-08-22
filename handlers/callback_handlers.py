@@ -1,3 +1,5 @@
+from http.client import responses
+
 from aiogram import Router, F
 from aiogram.fsm.state import default_state
 from aiogram.types import CallbackQuery, Message
@@ -5,9 +7,10 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from keyboards import BotInlineKeyboard, BotReplyKeyboard
-from services import update_user_gif_tags, search_user_gifs
+from services import update_user_gif_tags, delete_user_gif
 from lexicon import lang_ru
 from states import FSMUpdatingTags
+from utils import prepare_tags_to_send, execute_tags_from_message
 
 
 router = Router()
@@ -16,20 +19,16 @@ reply_keyboard = BotReplyKeyboard()
 
 @router.callback_query(F.data.split(':')[0] == 'delete')
 async def callback_deleting(callback: CallbackQuery):
-    user_id = str(callback.from_user.id)
-    gif_name = callback.data.split(':')[1]
+    user_id = callback.from_user.id
+    db_gif_id = int(callback.data.split(':')[1])
 
-    data = load_all_data(callback.message)
+    response = await delete_user_gif(user_id, db_gif_id)
 
-    try:
-        del data[user_id]['gifs_data'][gif_name]
-    except KeyError:
+    if response.code != 200:
         await callback.message.edit_caption(
             caption=lang_ru['deleted_later']
         )
         return
-
-    update_json(data)
 
     await callback.message.edit_caption(
         caption=lang_ru['deleted_gif']
@@ -43,7 +42,12 @@ async def callback_modifying_start(callback: CallbackQuery, state: FSMContext):
 
     await state.set_state(FSMUpdatingTags.updating)
     await state.update_data(
-        updating=[callback.message.message_id, callback.message.caption, callback.data.split(':')[1]]
+        updating=[
+            callback.message.message_id,
+            callback.message.caption,
+            callback.message.animation.file_id,
+            int(callback.data.split(':')[1])
+        ]
     )
 
     await callback.message.answer(
@@ -59,25 +63,29 @@ async def wrong_msg(message: Message):
 
 @router.message(StateFilter(FSMUpdatingTags.updating))
 async def modifying_tags(message: Message, state: FSMContext):
-    data = load_all_data(message)
-    gif_name = (await state.get_data())['updating'][2]
-    user_id = str(message.from_user.id)
+    data = await state.get_data()
+    tg_gif_id = data['updating'][2]
+    tg_user_id = message.from_user.id
     bot = message.bot
-    caption_data = (await state.get_data())['updating']
-    inline_keyboard = BotInlineKeyboard(caption_data[2])
+    caption_data = data['updating']
+    inline_keyboard = BotInlineKeyboard(data['updating'][3])
 
-    new_tags: list[str] = message.text.replace('#', '').split(',')
-    new_tags: list[str] = [f'#{tag.strip().lower()}' for tag in new_tags]
+    new_tags: list[str] = execute_tags_from_message(message.text)
 
-    data[user_id]['gifs_data'][gif_name]['gif_tags'] = new_tags
-
-    update_json(data)
+    response = await update_user_gif_tags(tg_user_id, tg_gif_id, new_tags)
+    if response.code != 200:
+        await message.answer(
+            text=lang_ru['error'],
+            reply_markup=reply_keyboard.keyboard_main(),
+        )
+        await state.clear()
+        return
 
     await state.clear()
     await bot.edit_message_caption(
         chat_id=message.chat.id,
         message_id=caption_data[0],
-        caption=caption_data[1],
+        caption=f'<b>Новые теги:</b>  {prepare_tags_to_send(new_tags)}',
         reply_markup=inline_keyboard.keyboard_gif_edit(),
     )
     await message.answer(

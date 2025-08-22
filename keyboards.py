@@ -19,10 +19,10 @@ class BotMainMenuButton:
 
 
 class BotInlineKeyboard:
-    def __init__(self, tg_gif_id: str, lang: dict = lang_ru_inline_buttons):
+    def __init__(self, gif_id: int, lang: dict = lang_ru_inline_buttons):
         self._inline_buttons_gif_edit = [
-            InlineKeyboardButton(text=lang['modify_tags'], callback_data=f'modify:{tg_gif_id}'),
-            InlineKeyboardButton(text=lang['delete_gif'], callback_data=f'delete:{tg_gif_id}')
+            InlineKeyboardButton(text=lang['modify_tags'], callback_data=f'modify:{gif_id}'),
+            InlineKeyboardButton(text=lang['delete_gif'], callback_data=f'delete:{gif_id}')
         ]
 
     def keyboard_gif_edit(self):
