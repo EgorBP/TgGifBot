@@ -6,9 +6,10 @@ from aiogram.fsm.context import FSMContext
 
 from lexicon import lang_ru, lang_ru_reply_buttons
 from states import FSMFindingGif, FSMUpdatingTags, FSMGifSaving
-from services import update_user_gif_tags, search_user_gifs, get_all_user_tags
+from services import update_user_gif_tags, search_user_gifs, get_all_user_tags, send_gif_with_inline_keyboard
 from keyboards import BotMainMenuButton, BotInlineKeyboard, BotReplyKeyboard
 from utils import prepare_tags_to_send, execute_tags_from_message
+import asyncio
 
 
 router = Router()
@@ -130,8 +131,10 @@ async def tags_gifs_saving(message: Message, state: FSMContext):
     gifs_data = await state.get_data()
     user_id = message.from_user.id
 
-    for gif_id in gifs_data['gifs_id']:
-        response = await update_user_gif_tags(user_id, gif_id, gifs_tags)
+    tasks = [update_user_gif_tags(user_id, gif_id, gifs_tags) for gif_id in gifs_data['gifs_id']]
+    task_responses = await asyncio.gather(*tasks)
+
+    for response in task_responses:
         if response.code != 200:
             await message.answer(
                 text=lang_ru['partly_saved'],
@@ -178,14 +181,12 @@ async def send_all_gifs(message: Message):
         )
         return
 
+    tasks = []
     for gif_data in data['gifs_data']:
         inline_markup = BotInlineKeyboard(gif_data['id'])
         tags = prepare_tags_to_send(gif_data['tags'])
-        await message.answer_animation(
-            gif_data['tg_gif_id'],
-            caption=f'<b>Теги:</b>  {tags}',
-            reply_markup=inline_markup.keyboard_gif_edit(),
-        )
+        tasks.append(send_gif_with_inline_keyboard(message, gif_data['tg_gif_id'], tags, inline_markup))
+    await asyncio.gather(*tasks)
 
 
 @router.message(
@@ -263,14 +264,12 @@ async def send_gif_by_tags(message: Message, state: FSMContext):
         await state.clear()
         return
 
+    tasks = []
     for gif_data in data['gifs_data']:
         inline_markup = BotInlineKeyboard(gif_data['id'])
         tags = prepare_tags_to_send(gif_data['tags'])
-        await message.answer_animation(
-            gif_data['tg_gif_id'],
-            caption=f'<b>Теги:</b>  {tags}',
-            reply_markup=inline_markup.keyboard_gif_edit(),
-        )
+        tasks.append(send_gif_with_inline_keyboard(message, gif_data['tg_gif_id'], tags, inline_markup))
+    await asyncio.gather(*tasks)
 
     await message.answer(
         text=lang_ru['all'],
