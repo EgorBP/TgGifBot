@@ -17,6 +17,12 @@ reply_keyboard = BotReplyKeyboard()
 
 @router.callback_query(F.data.split(':')[0] == 'delete')
 async def callback_deleting(callback: CallbackQuery):
+    """
+    Обработчик нажатия кнопки удаления GIF.
+
+    Удаляет GIF пользователя на сервере и обновляет подпись сообщения
+    в зависимости от результата операции.
+    """
     user_id = callback.from_user.id
     db_gif_id = int(callback.data.split(':')[1])
 
@@ -35,6 +41,12 @@ async def callback_deleting(callback: CallbackQuery):
 
 @router.callback_query(F.data.split(':')[0] == 'modify', StateFilter(default_state))
 async def callback_modifying_start(callback: CallbackQuery, state: FSMContext):
+    """
+    Обработчик начала редактирования тегов GIF.
+
+    Изменяет подпись сообщения, сохраняет состояние FSM с данными GIF
+    и уведомляет пользователя о возможности отправки новых тегов.
+    """
     await callback.message.edit_caption(caption=f'➡️{callback.message.caption}⬅️\n'
                                                 f'{lang_ru["now_edit"]}')
 
@@ -56,11 +68,22 @@ async def callback_modifying_start(callback: CallbackQuery, state: FSMContext):
 
 @router.message(~F.text, StateFilter(FSMUpdatingTags.updating))
 async def wrong_msg(message: Message):
+    """
+    Обработка неверного типа сообщения при редактировании тегов GIF.
+
+    Сообщение должно быть текстовым.
+    """
     await message.answer(lang_ru['only_text'])
 
 
 @router.message(StateFilter(FSMUpdatingTags.updating))
 async def modifying_tags(message: Message, state: FSMContext):
+    """
+    Обновление тегов существующего GIF.
+
+    Извлекает новые теги из текста, отправляет запрос на сервер для обновления,
+    редактирует подпись исходного сообщения и уведомляет пользователя о результате.
+    """
     data = await state.get_data()
     tg_gif_id = data['updating'][2]
     tg_user_id = message.from_user.id

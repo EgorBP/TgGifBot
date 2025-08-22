@@ -17,6 +17,12 @@ reply_keyboard = BotReplyKeyboard()
 
 @router.message(F.animation, StateFilter(default_state))
 async def gif_answer(msg: Message, state: FSMContext):
+    """
+    Обработчик получения GIF от пользователя.
+
+    Сохраняет file_id гифки в FSMContext и переводит состояние
+    в ожидание ввода тегов, отправляя сообщение с инструкцией.
+    """
     await state.set_state(FSMGifRegister.gif_id)
 
     gif_id = msg.animation.file_id      # Получаем id гифки
@@ -32,11 +38,22 @@ async def gif_answer(msg: Message, state: FSMContext):
 
 @router.message(StateFilter(FSMGifRegister.gif_tags), ~F.text)
 async def add_tags_to_gif_bad_message(message: Message):
+    """
+    Обработчик для неверного типа сообщения при вводе тегов.
+
+    Сообщение должно быть текстовым; если нет, уведомляет пользователя.
+    """
     await message.answer(lang_ru['only_text'])
 
 
 @router.message(StateFilter(FSMGifRegister.gif_tags))
 async def add_tags_to_gif(message: Message, state: FSMContext):
+    """
+    Обработчик добавления тегов к GIF.
+
+    Извлекает теги из текста, сохраняет их в FSMContext, отправляет
+    запрос на сервер для обновления тегов GIF и информирует пользователя о результате.
+    """
     tags: list[str] = execute_tags_from_message(message.text)
     await state.update_data(gif_tags=tags)
 

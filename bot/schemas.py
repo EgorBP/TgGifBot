@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 @dataclass()
 class ResponseModel:
-    data: dict
+    data: dict | list
     code: int
