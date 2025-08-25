@@ -43,7 +43,7 @@ async def help_command_answer(message: Message):
 
 
 @router.message(
-    or_f(Command('cancel'), F.text.startswith(lang_ru_reply_buttons['cancel'])),
+        or_f(Command('cancel'), F.text.startswith(lang_ru_reply_buttons['cancel'])),
     StateFilter(FSMUpdatingTags.updating),
 )
 async def stop_updating_tags(message: Message, state: FSMContext):
@@ -54,7 +54,7 @@ async def stop_updating_tags(message: Message, state: FSMContext):
     """
     caption_data = (await state.get_data())['updating']
     bot = message.bot
-    inline_keyboard = BotInlineKeyboard(caption_data[2])
+    inline_keyboard = BotInlineKeyboard(caption_data[3])
 
     await bot.edit_message_caption(
         chat_id=message.chat.id,
