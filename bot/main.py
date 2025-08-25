@@ -12,6 +12,7 @@ from states import storage
 from bot.config import config
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("aiogram").setLevel(logging.WARNING)
 
 
 async def main():
